@@ -38,15 +38,16 @@ func SetupRouter() *gin.Engine {
 		MaxAge:           12 * time.Hour,
 	}))
 
-	router := r.Group("/api")                 // Создание группы маршрутов
-	router.POST("/register", server.Register) // Регистрация пользователя
-	router.POST("/login", server.Login)       // Авторизация пользователя
+	router := r.Group("/api")
+
+	router.POST("/register", server.Register)
+	router.POST("/login", server.Login)
 
 	user := r.Group("/user")
 	user.Use(middleware.JWTMiddleware())
-
 	user.GET("/profile", server.GetCurrentUser)
 	user.POST("/logout", server.LogOut)
+	user.GET("/data", server.GetData)
 
 	return r
 }

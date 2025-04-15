@@ -118,5 +118,44 @@ func (s *Server) Login(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"token": token})
+	// Устанавливаем куку
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     "auth_token",         // имя куки
+		Value:    token,                // значение куки
+		Path:     "/",                  // путь, на котором кука будет доступна
+		HttpOnly: true,                 // кука доступна только через HTTP(S) протокол
+		SameSite: http.SameSiteLaxMode, // кука доступна только на том же сайте
+		Secure:   false,                // ставь true если HTTPS
+		MaxAge:   3600,                 // время жизни куки в секундах
+	})
+
+	c.JSON(http.StatusOK, gin.H{"message": "Login successful"})
+}
+
+func (s *Server) GetData(c *gin.Context) {
+	// Проверка наличия данных в кэше
+	data, found := s.cache.Get("user_data")
+	if found {
+		// Если данные есть в кэше, отправляем их
+		c.JSON(http.StatusOK, gin.H{"data": data})
+		return
+	}
+
+	// Если данных нет в кэше, получаем их из базы данных
+	// Пример: данные, которые могут быть кэшированы
+	var users []models.User
+	if err := s.db.Find(&users).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve data"})
+		return
+	}
+
+	// Генерация данных для отправки
+	// Здесь может быть любая логика для обработки данных перед отправкой
+	dataToCache := gin.H{"users": users}
+
+	// Сохраняем данные в кэш на 1 минуту
+	s.cache.Set("user_data", dataToCache, cache.DefaultExpiration)
+
+	// Отправляем данные пользователю
+	c.JSON(http.StatusOK, gin.H{"data": dataToCache})
 }
