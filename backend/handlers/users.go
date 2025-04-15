@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"front-back-6/models"
+	"front-back_6/models"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

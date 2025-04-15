@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"front-back_5/utils"
+	"front-back_6/utils"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
